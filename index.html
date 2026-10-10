@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mado</title>
+<style>
+  :root {
+    --bg: #14121a; --panel: #1d1a26; --panel2: #262233; --line: #34304a;
+    --text: #ece9f5; --muted: #9a94b3; --accent: #ff7a59; --accent2: #ffb199; --danger: #ff6b81;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 48px; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+  .brand { font-weight: 800; font-size: 22px; letter-spacing: .5px; cursor: pointer; }
+  .brand span { color: var(--accent); }
+  .who { display: flex; gap: 10px; align-items: center; color: var(--muted); }
+  .btn { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; }
+  .btn:hover { border-color: var(--accent2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #1a0f0b; font-weight: 700; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .link { background: none; border: 0; color: var(--muted); padding: 2px 4px; text-decoration: underline; }
+  .link:hover { color: var(--text); }
+  input[type=text], input[type=password], select {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .auth { max-width: 360px; margin: 8vh auto 0; }
+  .auth h1 { margin: 0 0 4px; }
+  .auth form { display: grid; gap: 10px; margin-top: 14px; }
+  .error { color: var(--danger); min-height: 1.4em; margin: 6px 0 0; }
+  .notice { background: #3a2a1d; border: 1px solid #6b4a2e; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+  .searchbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .searchbar input[type=text] { flex: 1 1 260px; font-size: 17px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 26px 0 10px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 6px 4px 12px;
+    display: inline-flex; align-items: center; gap: 4px; }
+  .chip:hover { border-color: var(--accent2); }
+  .chip button.main { background: none; border: 0; padding: 0; }
+  .chip button.x { background: none; border: 0; color: var(--muted); padding: 0 6px; font-size: 16px; line-height: 1; }
+  .chip button.x:hover { color: var(--danger); }
+  .tag { font-size: 11px; background: var(--panel2); border-radius: 4px; padding: 1px 5px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .item { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .item:hover { border-color: var(--accent); }
+  .item .t { font-weight: 600; }
+  .item .s { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .bar { height: 4px; background: var(--panel2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .watch { margin-top: 18px; }
+  .watch .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .watch h3 { margin: 0; font-size: 19px; }
+  .player { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
+  video { width: 100%; height: 100%; display: block; background: #000; }
+  .overlay { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 20px;
+    background: rgba(0,0,0,.55); }
+  .overlay[hidden] { display: none; }
+  .spinner { width: 34px; height: 34px; border: 3px solid #fff3; border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 10px 0; }
+  .controls label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+  .controls select { padding: 6px 8px; }
+  .eps { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; max-height: 260px; overflow: auto; padding: 2px; }
+  .ep { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 0; text-align: center; }
+  .ep:hover { border-color: var(--accent2); }
+  .ep.cur { background: var(--accent); border-color: var(--accent); color: #1a0f0b; font-weight: 700; }
+  .ep.seen { color: var(--accent2); }
+  .hint { color: var(--muted); font-size: 13px; }
+  .empty { color: var(--muted); }
+  /* suggestions */
+  .sughead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .sughead h2 { margin-bottom: 10px; }
+  .genres { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .genres .tab { padding: 4px 11px; font-size: 13px; }
+  .item .tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+  /* admin panel */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+  .tab { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 14px; }
+  .tab.on { background: var(--accent); border-color: var(--accent); color: #1a0f0b; font-weight: 700; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .tile b { display: block; font-size: 22px; }
+  .tile span { color: var(--muted); font-size: 12px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { vertical-align: middle; }
+  td.wrap { white-space: normal; word-break: break-word; min-width: 180px; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .8px; background: var(--panel); }
+  tr:last-child td { border-bottom: 0; }
+  .barcell { min-width: 120px; }
+  .barcell i { display: block; height: 8px; background: var(--accent); border-radius: 4px; min-width: 2px; }
+  .btn.small { padding: 4px 10px; font-size: 13px; }
+  .btn.danger { border-color: var(--danger); color: var(--danger); }
+  .btn.danger:hover { background: var(--danger); color: #fff; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .datarow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .datarow:last-child { border-bottom: 0; }
+  .datarow p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .flash { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--panel2);
+    border: 1px solid var(--accent); border-radius: 8px; padding: 10px 16px; z-index: 10; }
+  .st-bad { color: var(--danger); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand" id="brand">Ma<span>do</span></div>
+    <div class="who" id="who" hidden>
+      <span id="whoName"></span>
+      <button class="btn" id="adminBtn" hidden>Admin</button>
+      <button class="btn" id="logout">Sign out</button>
+    </div>
+  </header>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <!-- Sign in / register -->
+  <section id="authView" class="card auth" hidden>
+    <h1 id="authTitle">Sign in</h1>
+    <div class="hint">Your search history and last-watched episodes are saved to your account.</div>
+    <form id="authForm">
+      <input type="text" id="authUser" placeholder="Username" autocomplete="username" required>
+      <input type="password" id="authPass" placeholder="Password" autocomplete="current-password" required>
+      <button class="btn primary" id="authSubmit">Sign in</button>
+    </form>
+    <p class="error" id="authErr" role="alert"></p>
+    <button class="link" id="authSwap">New here? Create an account</button>
+    <button class="btn" id="guestBtn" type="button" style="margin-top:12px;width:100%">Continue as guest</button>
+    <div class="hint" style="margin-top:6px">Guests can search and watch. No history or personal details are stored.</div>
+  </section>
+
+  <!-- Admin panel -->
+  <section id="adminView" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h1 style="margin:0;font-size:22px">Admin</h1>
+      <button class="btn" id="adminBack">← Back to Mado</button>
+    </div>
+    <div class="tabs" id="adminTabs">
+      <button class="tab" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="users">Users</button>
+      <button class="tab" data-tab="requests">Requests</button>
+      <button class="tab" data-tab="data">Data</button>
+    </div>
+    <div id="adminBody"></div>
+  </section>
+
+  <!-- Main app -->
+  <main id="appView" hidden>
+    <form class="searchbar" id="searchForm">
+      <input type="text" id="q" placeholder="Search for an anime…" autocomplete="off" aria-label="Anime name">
+      <select id="mode" aria-label="Audio">
+        <option value="sub">Sub</option>
+        <option value="dub">Dub</option>
+      </select>
+      <button class="btn primary" id="searchBtn">Search</button>
+    </form>
+    <p class="error" id="searchErr" role="alert"></p>
+
+    <section id="sugBox">
+      <div class="sughead"><h2 id="sugTitle">Suggestions</h2><button class="link" id="sugShuffle" type="button">shuffle</button></div>
+      <div class="genres" id="sugGenres"></div>
+      <div class="grid" id="sugList"></div>
+    </section>
+
+    <section id="watchView" class="watch" hidden>
+      <div class="head">
+        <h3 id="wTitle"></h3>
+        <span class="hint" id="wSub"></span>
+      </div>
+      <div class="player">
+        <video id="video" controls playsinline preload="auto"></video>
+        <div class="overlay" id="overlay" hidden>
+          <div><div class="spinner" id="spin"></div><div id="overlayMsg"></div>
+            <button class="btn" id="retry" hidden style="margin-top:10px">Try again</button></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="prev">⏮ Previous</button>
+        <button class="btn" id="next">Next ⏭</button>
+        <label><input type="checkbox" id="autoplay" checked> Autoplay next</label>
+        <label>Quality
+          <select id="quality">
+            <option value="best">Best</option><option value="1080p">1080p</option>
+            <option value="720p">720p</option><option value="480p">480p</option><option value="360p">360p</option>
+          </select>
+        </label>
+      </div>
+      <div class="eps" id="eps"></div>
+    </section>
+
+    <section id="continueBox" hidden>
+      <h2>Continue watching</h2>
+      <div class="grid" id="continueList"></div>
+    </section>
+
+    <section id="resultsBox" hidden>
+      <h2 id="resultsTitle">Results</h2>
+      <div class="grid" id="results"></div>
+    </section>
+
+    <section id="recentBox" hidden>
+      <h2>Recent searches <button class="link" id="clearSearches">clear</button></h2>
+      <div class="row" id="recent"></div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props = {}, ...kids) => {
+    const n = Object.assign(document.createElement(tag), props);
+    for (const k of kids) n.append(k);
+    return n;
+  };
+  let guestMode = false;   // guests: nothing is stored, not even preferences in this browser
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } },
+    set(k, v) { if (guestMode) return; try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  async function api(path, opts = {}) {
+    const init = { method: opts.method || "GET", credentials: "same-origin", keepalive: !!opts.keepalive, headers: { "X-Mado": "1" } };
+    if (opts.body !== undefined) { init.body = JSON.stringify(opts.body); init.headers["Content-Type"] = "application/json"; }
+    let res;
+    try { res = await fetch(path, init); } catch { throw new Error("Can't reach the server."); }
+    if (res.status === 204) return null;
+    let data = null;
+    try { data = await res.json(); } catch {}
+    if (res.status === 401 && path !== "/api/login") { showAuth(); throw new Error("Sign in to continue."); }
+    if (!res.ok) throw new Error((data && data.error) || `Request failed (${res.status}).`);
+    return data;
+  }
+
+  // ---------------------------------------------------------------- state
+  const S = {
+    user: null, q: "", mode: "sub", entry: null, episodes: [], ep: null,
+    last: null, playToken: 0, hls: null, prefetch: null, lastSave: 0, ended: false,
+    resumeAt: 0, retried: false, canSave: false,
+  };
+  const video = $("video");
+
+  // ---------------------------------------------------------------- auth
+  let registering = false;
+  function setAuthMode(reg) {
+    registering = reg;
+    $("authTitle").textContent = reg ? "Create account" : "Sign in";
+    $("authSubmit").textContent = reg ? "Create account" : "Sign in";
+    $("authSwap").textContent = reg ? "Have an account? Sign in" : "New here? Create an account";
+    $("authPass").autocomplete = reg ? "new-password" : "current-password";
+    $("authErr").textContent = "";
+  }
+  $("authSwap").onclick = () => setAuthMode(!registering);
+  $("authForm").onsubmit = async (e) => {
+    e.preventDefault();
+    $("authErr").textContent = "";
+    $("authSubmit").disabled = true;
+    try {
+      const r = await api(registering ? "/api/register" : "/api/login",
+        { method: "POST", body: { username: $("authUser").value, password: $("authPass").value } });
+      $("authPass").value = "";
+      enter(r.user, false, !!r.admin);
+    } catch (err) { $("authErr").textContent = err.message; }
+    finally { $("authSubmit").disabled = false; }
+  };
+  $("guestBtn").onclick = async () => {
+    $("authErr").textContent = "";
+    try { const r = await api("/api/guest", { method: "POST", body: {} }); enter(r.user, true); }
+    catch (err) { $("authErr").textContent = err.message; }
+  };
+  $("logout").onclick = async () => {
+    saveProgress(true);
+    stopPlayer();
+    try { await api("/api/logout", { method: "POST", body: {} }); } catch {}
+    S.user = null; showAuth();
+  };
+
+  function showAuth() {
+    S.user = null; guestMode = false; closeAdmin(); $("adminBtn").hidden = true;
+    $("continueBox").hidden = true; $("recentBox").hidden = true;
+    $("authView").hidden = false; $("appView").hidden = true; $("who").hidden = true;
+  }
+  function enter(user, guest = false, isAdmin = false) {
+    S.user = user; guestMode = guest;
+    $("logout").textContent = guest ? "Sign in" : "Sign out";
+    $("adminBtn").hidden = !isAdmin;
+    closeAdmin();
+    $("whoName").textContent = guest ? "Guest" : user;
+    $("authView").hidden = true; $("appView").hidden = false; $("who").hidden = false;
+    $("mode").value = guest ? "sub" : store.get("mado.mode", "sub");
+    $("autoplay").checked = guest ? true : store.get("mado.autoplay", "1") === "1";
+    $("quality").value = guest ? "best" : store.get("mado.quality", "best");
+    S.watching = []; sugGenre = ""; renderSuggestions(); showSug(true);
+    if (guest) { $("continueBox").hidden = true; $("recentBox").hidden = true; } else loadHistory();
+  }
+
+  // ---------------------------------------------------------------- history
+  async function loadHistory() {
+    let h;
+    try { h = await api("/api/history"); } catch { return; }
+    S.watching = h.watching; renderSuggestions();
+    const cl = $("continueList"); cl.replaceChildren();
+    for (const w of h.watching) {
+      const pct = w.duration > 0 ? Math.min(100, (w.position / w.duration) * 100) : 0;
+      const b = el("button", { className: "item", type: "button" },
+        el("div", { className: "t", textContent: w.title }),
+        el("div", { className: "s", textContent: `Episode ${w.episode}${w.total ? " of " + w.total : ""} · ${w.mode}` }));
+      if (pct > 0) { const bar = el("div", { className: "bar" }); const i = el("i"); i.style.width = pct + "%"; bar.append(i); b.append(bar); }
+      b.onclick = () => resume(w);
+      const rm = el("button", { className: "link", type: "button", textContent: "remove" });
+      rm.onclick = async (e) => {
+        e.stopPropagation();
+        await api("/api/history/watching/remove", { method: "POST", body: { show: w.show, mode: w.mode } }).catch(() => {});
+        loadHistory();
+      };
+      b.append(rm);
+      cl.append(b);
+    }
+    $("continueBox").hidden = !h.watching.length;
+
+    const rc = $("recent"); rc.replaceChildren();
+    for (const s of h.searches) {
+      const main = el("button", { className: "main", type: "button", textContent: s.query });
+      main.append(" ", el("span", { className: "tag", textContent: s.mode }));
+      main.onclick = () => { $("q").value = s.query; $("mode").value = s.mode; doSearch(); };
+      const x = el("button", { className: "x", type: "button", title: "Remove", textContent: "×" });
+      x.onclick = async () => { await api("/api/history/searches/" + s.id, { method: "DELETE" }).catch(() => {}); loadHistory(); };
+      rc.append(el("span", { className: "chip" }, main, x));
+    }
+    $("recentBox").hidden = !h.searches.length;
+  }
+  $("clearSearches").onclick = async () => {
+    await api("/api/history/searches", { method: "DELETE" }).catch(() => {});
+    loadHistory();
+  };
+
+  // ---------------------------------------------------------------- search
+  $("searchForm").onsubmit = (e) => { e.preventDefault(); doSearch(); };
+  $("mode").onchange = () => store.set("mado.mode", $("mode").value);
+
+  async function doSearch() {
+    const q = $("q").value.trim();
+    if (!q) return;
+    store.set("mado.mode", $("mode").value);
+    $("searchErr").textContent = "";
+    $("searchBtn").disabled = true; $("searchBtn").textContent = "Searching…";
+    $("resultsBox").hidden = true; showSug(false);
+    try {
+      const r = await api(`/api/search?q=${encodeURIComponent(q)}&mode=${$("mode").value}`);
+      S.q = r.query; S.mode = r.mode;
+      renderResults(r.results);
+      if (!guestMode) loadHistory();
+    } catch (err) { $("searchErr").textContent = err.message; showSug(true); }
+    finally { $("searchBtn").disabled = false; $("searchBtn").textContent = "Search"; }
+  }
+
+  function renderResults(results) {
+    const box = $("results"); box.replaceChildren();
+    $("resultsTitle").textContent = `Results for “${S.q}” (${results.length})`;
+    for (const r of results) {
+      const b = el("button", { className: "item", type: "button" },
+        el("div", { className: "t", textContent: r.guessed ? r.title : r.title }),
+        el("div", { className: "s", textContent: r.last_episode ? `Last watched: episode ${r.last_episode}` : "Not watched yet" }));
+      b.onclick = () => openShow(S.q, S.mode, r.show, r.index, r.title, null);
+      box.append(b);
+    }
+    $("resultsBox").hidden = false;
+    $("resultsBox").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ---------------------------------------------------------------- show + episodes
+  async function openShow(q, mode, show, index, title, startEp) {
+    $("searchErr").textContent = "";
+    $("watchView").hidden = false; showSug(false);
+    $("wTitle").textContent = title;
+    $("wSub").textContent = "Loading episodes…";
+    $("eps").replaceChildren();
+    saveProgress(true);
+    stopPlayer();
+    S.ep = null; S.entry = null; S.episodes = []; S.prefetch = null;
+    showOverlay("Loading episodes…", true);
+    $("watchView").scrollIntoView({ behavior: "smooth", block: "start" });
+    let r;
+    try {
+      r = await api(`/api/episodes?q=${encodeURIComponent(q)}&mode=${mode}&show=${encodeURIComponent(show)}&index=${index}`);
+    } catch (err) { showOverlay(err.message, false, null); return; }
+    S.q = q; S.mode = mode; S.entry = r.entry; S.episodes = r.episodes; S.last = r.last;
+    $("wTitle").textContent = r.entry.title;
+    $("wSub").textContent = `${r.episodes.length} episode${r.episodes.length === 1 ? "" : "s"} · ${mode}`;
+    renderEpisodes();
+    let ep = startEp || (r.last && r.episodes.includes(r.last.episode) ? r.last.episode : null);
+    // finished the last episode we saved? offer the next one instead
+    if (!startEp && r.last && ep && r.last.duration > 0 && r.last.position >= r.last.duration - 30) {
+      const nx = r.episodes[r.episodes.indexOf(ep) + 1];
+      if (nx) ep = nx;
+    }
+    if (ep) playEpisode(ep);
+    else showOverlay("Pick an episode to start watching.", false, null);
+  }
+
+  function resume(w) { openShow(w.query, w.mode, w.show, w.index, w.title, w.episode); }
+
+  function renderEpisodes() {
+    const box = $("eps"); box.replaceChildren();
+    for (const ep of S.episodes) {
+      const b = el("button", { className: "ep", type: "button", textContent: ep });
+      if (ep === S.ep) b.classList.add("cur");
+      else if (S.last && S.last.episode === ep) b.classList.add("seen");
+      b.onclick = () => playEpisode(ep);
+      box.append(b);
+    }
+    const cur = box.querySelector(".cur");
+    if (cur) cur.scrollIntoView({ block: "nearest" });
+    const i = S.episodes.indexOf(S.ep);
+    $("prev").disabled = i <= 0;
+    $("next").disabled = i < 0 || i >= S.episodes.length - 1;
+  }
+
+  // ---------------------------------------------------------------- playback
+  function showOverlay(msg, spin, retry) {
+    $("overlay").hidden = false;
+    $("overlayMsg").textContent = msg;
+    $("spin").hidden = !spin;
+    $("retry").hidden = !retry;
+    $("retry").onclick = retry || null;
+  }
+  const hideOverlay = () => { $("overlay").hidden = true; };
+
+  function stopPlayer() {
+    S.playToken++;
+    if (S.hls) { S.hls.destroy(); S.hls = null; }
+    video.pause();
+    video.removeAttribute("src");
+    video.querySelectorAll("track").forEach((t) => t.remove());
+    video.load();
+  }
+
+  function playReq(ep) {
+    return api("/api/play", { method: "POST", body: {
+      q: S.q, mode: S.mode, show: S.entry.show, index: S.entry.index, episode: ep, quality: $("quality").value,
+    } });
+  }
+
+  async function playEpisode(ep, opts = {}) {
+    if (!S.entry) return;
+    saveProgress(true);
+    const token = ++S.playToken;
+    S.ep = ep; S.ended = false; S.retried = false;
+    S.resumeAt = opts.resume !== undefined ? opts.resume :
+      (S.last && S.last.episode === ep && S.last.duration > 0 && S.last.position > 10 &&
+       S.last.position < S.last.duration - 30 ? S.last.position : 0);
+    S.canSave = false;   // don't overwrite the saved time with 0:00 while the stream is still loading
+    renderEpisodes();
+    $("wSub").textContent = `Episode ${ep} of ${S.episodes.length} · ${S.mode}`;
+    if (S.hls) { S.hls.destroy(); S.hls = null; }
+    video.pause();
+    showOverlay(`Fetching episode ${ep}…`, true, null);
+
+    let info;
+    try {
+      info = (S.prefetch && S.prefetch.ep === ep && S.prefetch.key === prefetchKey()) ? await S.prefetch.promise : await playReq(ep);
+    } catch (err) {
+      if (token !== S.playToken) return;
+      showOverlay(err.message, false, () => playEpisode(ep));
+      return;
+    } finally { if (S.prefetch && S.prefetch.ep === ep) S.prefetch = null; }
+    if (token !== S.playToken) return;
+    attach(info, token);
+    // fix the title when ani-cli skipped the menu and we only had a guess
+    if (info.title && S.entry.guessed) { S.entry.title = info.title; $("wTitle").textContent = info.title; }
+  }
+
+  const prefetchKey = () => [S.q, S.mode, S.entry && S.entry.show, $("quality").value].join("|");
+
+  function attach(info, token) {
+    video.querySelectorAll("track").forEach((t) => t.remove());
+    if (info.subtitle) {
+      video.append(el("track", { kind: "subtitles", label: "Subtitles", srclang: "en", src: info.subtitle, default: true }));
+    }
+    const target = S.resumeAt > 1 ? S.resumeAt : 0;
+    S.resumeAt = 0;
+    const settle = () => {   // called once playback really runs at the resumed position
+      if (token !== S.playToken || S.canSave) return;
+      if (target && video.currentTime < target - 5) { try { video.currentTime = target; } catch {} }
+      S.canSave = true;
+    };
+    if (target) video.addEventListener("playing", settle, { once: true });
+    const onReady = () => {
+      if (token !== S.playToken) return;
+      hideOverlay();
+      if (target && !(S.hls)) { try { video.currentTime = target; } catch {} }   // MP4 / native HLS
+      video.play().catch(() => showOverlay("Press play to start.", false, null));
+      if (!target) { S.canSave = true; saveProgress(true); }   // new episode: record it as the last watched
+    };
+    if (info.kind === "hls" && window.Hls && Hls.isSupported()) {
+      const hls = new Hls({ maxBufferLength: 40, startPosition: target || -1 });
+      S.hls = hls;
+      hls.loadSource(info.src);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, onReady);
+      hls.on(Hls.Events.ERROR, (_e, d) => {
+        if (!d.fatal || token !== S.playToken) return;
+        if (d.type === Hls.ErrorTypes.NETWORK_ERROR && !S.retried) { S.retried = true; hls.startLoad(); }
+        else if (d.type === Hls.ErrorTypes.MEDIA_ERROR && !S.retried) { S.retried = true; hls.recoverMediaError(); }
+        else failed(token);
+      });
+    } else {
+      video.src = info.src;   // MP4, or HLS in Safari
+      video.addEventListener("loadedmetadata", onReady, { once: true });
+      video.load();
+    }
+  }
+
+  function failed(token) {
+    if (token !== S.playToken) return;
+    const ep = S.ep;
+    showOverlay("This stream failed to load.", false, () => {
+      // drop the cached link on the server side by asking again in a different quality order
+      playEpisode(ep, { resume: video.currentTime || 0 });
+    });
+  }
+  video.addEventListener("error", () => { if (video.getAttribute("src")) failed(S.playToken); });
+
+  // next / previous / autoplay
+  const nextEp = () => S.episodes[S.episodes.indexOf(S.ep) + 1];
+  const prevEp = () => S.episodes[S.episodes.indexOf(S.ep) - 1];
+  $("next").onclick = () => { const n = nextEp(); if (n) playEpisode(n, { resume: 0 }); };
+  $("prev").onclick = () => { const p = prevEp(); if (p) playEpisode(p, { resume: 0 }); };
+  $("autoplay").checked = store.get("mado.autoplay", "1") === "1";
+  $("autoplay").onchange = () => store.set("mado.autoplay", $("autoplay").checked ? "1" : "0");
+  $("quality").value = store.get("mado.quality", "best");
+  $("quality").onchange = () => {
+    store.set("mado.quality", $("quality").value);
+    if (S.ep) playEpisode(S.ep, { resume: video.currentTime || 0 });
+  };
+
+  video.addEventListener("ended", () => {
+    S.ended = true;
+    saveProgress(true);
+    const n = nextEp();
+    if (n && $("autoplay").checked) {
+      S.last = { episode: S.ep, position: video.duration || 0, duration: video.duration || 0 };
+      playEpisode(n, { resume: 0 });
+    }
+  });
+
+  // warm the next episode's stream link once we're a third of the way in
+  video.addEventListener("timeupdate", () => {
+    const now = Date.now();
+    if (now - S.lastSave > 10000) saveProgress(false);
+    const n = nextEp();
+    if (n && video.duration > 0 && video.currentTime / video.duration > 0.33 &&
+        (!S.prefetch || S.prefetch.ep !== n || S.prefetch.key !== prefetchKey())) {
+      const p = playReq(n);
+      p.catch(() => { if (S.prefetch && S.prefetch.promise === p) S.prefetch = null; });
+      S.prefetch = { ep: n, key: prefetchKey(), promise: p };
+    }
+  });
+  video.addEventListener("pause", () => { if (!video.ended) saveProgress(true); });
+
+  function saveProgress(force, keepalive) {
+    if (!S.user || guestMode || !S.entry || !S.ep || !S.canSave) return;
+    const pos = video.currentTime || 0, dur = video.duration || 0;
+    S.last = { episode: S.ep, position: Number.isFinite(pos) ? pos : 0, duration: Number.isFinite(dur) ? dur : 0 };
+    // while a new episode is still loading there's no position to report; record the start of it
+    S.lastSave = Date.now();
+    api("/api/progress", { method: "POST", keepalive: !!keepalive, body: {
+      show: S.entry.show, title: S.entry.title, q: S.q, mode: S.mode, index: S.entry.index,
+      total: S.episodes.length, episode: S.ep,
+      position: Number.isFinite(pos) ? pos : 0, duration: Number.isFinite(dur) ? dur : 0,
+    } }).then(() => { if (force) loadHistoryDebounced(); }).catch(() => {});
+  }
+  let histTimer = 0;
+  function loadHistoryDebounced() { clearTimeout(histTimer); histTimer = setTimeout(loadHistory, 800); }
+  window.addEventListener("pagehide", () => saveProgress(true, true));
+  document.addEventListener("visibilitychange", () => { if (document.hidden) saveProgress(true, true); });
+
+
+  // ---------------------------------------------------------------- suggestions
+  // [search text, display title, genres, one-line pitch]
+  const CATALOG = [
+    ["sousou no frieren", "Frieren: Beyond Journey's End", "Fantasy,Adventure,Drama", "An elf mage looks back on a hero's journey, and learns what it meant."],
+    ["fullmetal alchemist brotherhood", "Fullmetal Alchemist: Brotherhood", "Action,Adventure,Fantasy", "Two brothers search for the Philosopher's Stone."],
+    ["death note", "Death Note", "Thriller,Mystery", "A student finds a notebook that kills whoever's name is written in it."],
+    ["shingeki no kyojin", "Attack on Titan", "Action,Drama", "Humanity fights giants from behind towering walls."],
+    ["steins gate", "Steins;Gate", "Sci-Fi,Thriller", "Text messages to the past start changing everything."],
+    ["cowboy bebop", "Cowboy Bebop", "Sci-Fi,Action", "Bounty hunters drift through space, haunted by their pasts."],
+    ["one piece", "One Piece", "Adventure,Action,Comedy", "A rubber-bodied pirate sets sail for the ultimate treasure."],
+    ["naruto", "Naruto", "Action,Adventure", "An outcast ninja dreams of becoming the village leader."],
+    ["kimetsu no yaiba", "Demon Slayer", "Action,Fantasy", "A boy becomes a demon hunter to save his sister."],
+    ["jujutsu kaisen", "Jujutsu Kaisen", "Action,Fantasy", "Sorcerers battle cursed spirits."],
+    ["boku no hero academia", "My Hero Academia", "Action", "A powerless kid inherits the greatest hero's ability."],
+    ["one punch man", "One Punch Man", "Action,Comedy", "A hero who wins every fight with a single punch is bored."],
+    ["hunter x hunter 2011", "Hunter x Hunter (2011)", "Adventure,Action", "A boy becomes a Hunter to find his father."],
+    ["mob psycho 100", "Mob Psycho 100", "Action,Comedy", "A shy psychic tries to live a normal life."],
+    ["spy x family", "Spy x Family", "Comedy,Action", "A spy, an assassin and a telepath pose as a family."],
+    ["kaguya-sama", "Kaguya-sama: Love Is War", "Romance,Comedy", "Two geniuses refuse to be the first to confess."],
+    ["kimi no na wa", "Your Name", "Romance,Drama", "Two teenagers swap bodies across the distance."],
+    ["koe no katachi", "A Silent Voice", "Drama,Romance", "A former bully tries to make amends with a deaf classmate."],
+    ["violet evergarden", "Violet Evergarden", "Drama,Fantasy", "A former soldier learns about feelings by writing letters."],
+    ["clannad after story", "Clannad: After Story", "Drama,Romance,Slice of Life", "A gentle school story that turns deeply emotional."],
+    ["toradora", "Toradora!", "Romance,Comedy", "Two classmates team up to win over their crushes."],
+    ["haikyuu", "Haikyu!!", "Sports", "A short volleyball player chases the top."],
+    ["kuroko no basket", "Kuroko's Basketball", "Sports", "A phantom sixth man joins a rising high school team."],
+    ["blue lock", "Blue Lock", "Sports", "Strikers fight to become Japan's best forward."],
+    ["yuru camp", "Laid-Back Camp", "Slice of Life", "Cozy camping trips with friends."],
+    ["barakamon", "Barakamon", "Slice of Life,Comedy", "A calligrapher moves to an island and meets its children."],
+    ["mushishi", "Mushishi", "Fantasy,Slice of Life,Mystery", "A wanderer studies strange, life-like beings."],
+    ["monster", "Monster", "Thriller,Mystery,Drama", "A surgeon hunts the patient he once saved."],
+    ["odd taxi", "Odd Taxi", "Mystery,Comedy", "A walrus cab driver gets pulled into a missing-girl case."],
+    ["vinland saga", "Vinland Saga", "Action,Drama,Adventure", "Vikings, revenge and what comes after."],
+    ["dandadan", "Dandadan", "Action,Comedy,Sci-Fi", "Ghosts and aliens collide with two teenagers."],
+    ["solo leveling", "Solo Leveling", "Action,Fantasy", "The weakest hunter gets a chance to level up."],
+    ["chainsaw man", "Chainsaw Man", "Action,Fantasy", "A debt-ridden devil hunter merges with his pet devil."],
+    ["bocchi the rock", "Bocchi the Rock!", "Comedy,Slice of Life", "An anxious guitarist joins a band."],
+    ["oshi no ko", "Oshi no Ko", "Drama,Mystery", "Reborn as the child of his favourite idol."],
+    ["cyberpunk edgerunners", "Cyberpunk: Edgerunners", "Sci-Fi,Action", "A street kid tries to survive in Night City."],
+    ["neon genesis evangelion", "Neon Genesis Evangelion", "Sci-Fi,Drama", "Teenagers pilot giant machines against the Angels."],
+    ["tengen toppa gurren lagann", "Gurren Lagann", "Action,Sci-Fi", "Dig through the sky, no matter what."],
+    ["code geass", "Code Geass", "Sci-Fi,Thriller,Action", "An exiled prince leads a rebellion with a mind-control power."],
+    ["made in abyss", "Made in Abyss", "Adventure,Fantasy,Drama", "Children descend into a deadly bottomless pit."],
+    ["dr stone", "Dr. Stone", "Sci-Fi,Adventure,Comedy", "A genius rebuilds civilization from scratch."],
+    ["fruits basket", "Fruits Basket", "Romance,Drama", "A girl discovers a family cursed by the zodiac."],
+    ["ouran high school host club", "Ouran High School Host Club", "Romance,Comedy", "A scholarship student joins a school's host club."],
+    ["gintama", "Gintama", "Comedy,Action", "Odd jobs in an alien-occupied Edo."],
+    ["konosuba", "KonoSuba", "Comedy,Fantasy", "A hopeless adventuring party in a fantasy world."],
+    ["re zero", "Re:Zero", "Fantasy,Drama,Thriller", "A boy who returns from death each time he dies."],
+    ["kusuriya no hitorigoto", "The Apothecary Diaries", "Mystery,Drama", "A young woman solves poison mysteries at the imperial court."],
+  ].map(([q, title, genres, blurb]) => ({ q, title, genres: genres.split(","), blurb }));
+  const GENRES = ["Action", "Adventure", "Comedy", "Drama", "Fantasy", "Romance", "Sci-Fi", "Slice of Life", "Mystery", "Thriller", "Sports"];
+  const norm = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, "");
+  let sugSeed = Math.floor(Math.random() * 1e9), sugGenre = "";
+
+  function seeded(seed) {   // small deterministic RNG so the list stays put when history refreshes
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  function renderSuggestions() {
+    const rnd = seeded(sugSeed);
+    const watched = (S.watching || []).map((w) => ({ n: norm(w.title), title: w.title }));
+    const seen = (c) => watched.some((w) => w.n && (w.n.includes(norm(c.q)) || norm(c.title).includes(w.n)));
+    // genres of what this person already watches (most recent first)
+    const liked = {}; let because = "";
+    watched.forEach((w, i) => CATALOG.forEach((c) => {
+      if (w.n.includes(norm(c.q)) || norm(c.title).includes(w.n)) {
+        if (!because) because = w.title;
+        c.genres.forEach((g) => { liked[g] = (liked[g] || 0) + 1 / (1 + i * 0.2); });
+      }
+    }));
+    let pool = CATALOG.filter((c) => !seen(c));
+    if (sugGenre) pool = pool.filter((c) => c.genres.includes(sugGenre));
+    const scored = pool.map((c) => ({ c, score: (sugGenre ? 0 : c.genres.reduce((a, g) => a + (liked[g] || 0), 0)) + rnd() * 1.5 }))
+      .sort((a, b) => b.score - a.score).slice(0, 6);
+    $("sugTitle").textContent = sugGenre ? sugGenre : because && !sugGenre ? `Because you watched ${because}` : "Suggestions";
+
+    const chips = $("sugGenres"); chips.replaceChildren();
+    for (const g of ["", ...GENRES]) {
+      const b = el("button", { className: "tab" + (g === sugGenre ? " on" : ""), type: "button", textContent: g || (because ? "For you" : "Mix") });
+      b.onclick = () => { sugGenre = g; renderSuggestions(); };
+      chips.append(b);
+    }
+    const list = $("sugList"); list.replaceChildren();
+    for (const { c } of scored) {
+      const tags = el("div", { className: "tags" }, ...c.genres.slice(0, 3).map((g) => el("span", { className: "tag", textContent: g })));
+      const card = el("button", { className: "item", type: "button" },
+        el("div", { className: "t", textContent: c.title }), el("div", { className: "s", textContent: c.blurb }), tags);
+      card.onclick = () => { $("q").value = c.q; doSearch(); };
+      list.append(card);
+    }
+    if (!scored.length) list.append(el("p", { className: "empty", textContent: "Nothing left in this genre. You've seen it all!" }));
+  }
+  $("sugShuffle").onclick = () => { sugSeed = (sugSeed + 7919) >>> 0; renderSuggestions(); };
+  const showSug = (on) => { $("sugBox").hidden = !on; };
+
+  function goHome() {
+    if (!S.user) return;
+    saveProgress(true);
+    stopPlayer();
+    S.ep = null; S.entry = null; S.episodes = []; S.prefetch = null;
+    $("watchView").hidden = true; $("resultsBox").hidden = true; $("searchErr").textContent = "";
+    showSug(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  $("brand").onclick = goHome;
+
+  // ---------------------------------------------------------------- admin panel
+  const fmtBytes = (n) => {
+    n = Number(n) || 0; const u = ["B", "KB", "MB", "GB", "TB"]; let i = 0;
+    while (n >= 1024 && i < 4) { n /= 1024; i++; }
+    return (i ? n.toFixed(n >= 100 ? 0 : 1) : n) + " " + u[i];
+  };
+  const fmtTime = (ts) => ts ? new Date(ts * 1000).toLocaleString() : "never";
+  const fmtDur = (s) => { const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`; };
+  const ago = (ts) => {
+    if (!ts) return "never";
+    const s = Math.max(0, Date.now() / 1000 - ts);
+    return s < 90 ? "just now" : s < 5400 ? Math.round(s / 60) + " min ago" : s < 129600 ? Math.round(s / 3600) + " h ago" : Math.round(s / 86400) + " d ago";
+  };
+  let adminTimer = 0, adminTab = "overview";
+  function flash(msg) {
+    const f = el("div", { className: "flash", textContent: msg }); document.body.append(f);
+    setTimeout(() => f.remove(), 2800);
+  }
+  function table(heads, rows, empty = "Nothing here yet.") {
+    const t = el("table"), thead = el("thead"), hr = el("tr");
+    heads.forEach((h) => hr.append(el("th", { textContent: h }))); thead.append(hr); t.append(thead);
+    const tb = el("tbody");
+    for (const r of rows) {
+      const tr = el("tr");
+      r.forEach((c) => { const td = el("td"); if (c instanceof Node) td.append(c); else td.textContent = c ?? ""; tr.append(td); });
+      tb.append(tr);
+    }
+    if (!rows.length) tb.append(el("tr", {}, el("td", { colSpan: heads.length, className: "empty", textContent: empty })));
+    t.append(tb);
+    return el("div", { className: "tablewrap" }, t);
+  }
+  const tile = (value, label) => el("div", { className: "tile" }, el("b", { textContent: String(value) }), el("span", { textContent: label }));
+
+  function openAdmin() {
+    $("appView").hidden = true; $("adminView").hidden = false;
+    showTab(adminTab);
+  }
+  function closeAdmin() {
+    clearInterval(adminTimer); adminTimer = 0;
+    $("adminView").hidden = true;
+    if (S.user) $("appView").hidden = false;
+  }
+  $("adminBtn").onclick = openAdmin;
+  $("adminBack").onclick = closeAdmin;
+  $("adminTabs").onclick = (e) => { const t = e.target.closest("[data-tab]"); if (t) showTab(t.dataset.tab); };
+
+  function showTab(name) {
+    adminTab = name;
+    clearInterval(adminTimer); adminTimer = 0;
+    document.querySelectorAll("#adminTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.tab === name));
+    const body = $("adminBody"); body.replaceChildren(el("p", { className: "hint", textContent: "Loading…" }));
+    const render = { overview: renderOverview, users: renderUsers, requests: renderRequests, data: renderData }[name];
+    const run = () => render(body).catch((err) => { if (adminTab === name) body.replaceChildren(el("p", { className: "error", textContent: err.message })); });
+    run();
+    if (name === "overview") adminTimer = setInterval(() => { if (!document.hidden) run(); }, 10000);
+  }
+
+  async function renderOverview(body) {
+    const [o, u] = await Promise.all([api("/api/admin/overview"), api("/api/admin/usage?days=14")]);
+    if (adminTab !== "overview") return;
+    const sys = o.system, ev = o.events_24h;
+    const memUsed = sys.mem_total ? `${fmtBytes(sys.mem_available)} free of ${fmtBytes(sys.mem_total)}` : "n/a";
+    const tiles = el("div", { className: "tiles" },
+      tile(o.viewers_now, "watching now"), tile(o.streams_active, "open streams"),
+      tile(`${o.jobs_active}/${o.jobs_max}`, "ani-cli jobs running"),
+      tile(fmtBytes(o.bytes_today), "streamed today"), tile(fmtBytes(o.bytes_7d), "streamed, 7 days"),
+      tile(fmtBytes(o.bytes_30d), "streamed, 30 days"), tile(fmtBytes(o.bytes_total), "streamed, all time"),
+      tile(o.users, `accounts (+${o.new_users_7d} this week)`),
+      tile((ev.search || 0) + (ev.episodes || 0) + (ev.play || 0), "requests, last 24 h"),
+      tile(ev.login_failed || 0, "failed logins, 24 h"), tile(ev.guest || 0, "guest visits, 24 h"),
+      tile(sys.load ? sys.load.join(" / ") : "n/a", "CPU load (1/5/15 min)"),
+      tile(memUsed, "memory"),
+      tile(sys.disk_free != null ? fmtBytes(sys.disk_free) : "n/a", "disk free"),
+      tile(fmtBytes(sys.data_size), "Mado data folder"), tile(fmtDur(sys.uptime), "server uptime"));
+    const max = Math.max(1, ...u.daily.map((d) => d.bytes));
+    const daily = table(["Day", "Streamed", "", "Requests", "Searches", "Episodes played"],
+      u.daily.slice().reverse().map((d) => { const bar = el("div", { className: "barcell" }, el("i")); bar.firstChild.style.width = (d.bytes / max * 100) + "%";
+        return [d.day, fmtBytes(d.bytes), bar, d.requests, d.searches, d.plays]; }));
+    const top = table(["Top users (14 days)", "Streamed", "Requests", "Episodes played"],
+      u.top.map((t) => [t.username, fmtBytes(t.bytes), t.requests, t.plays]), "No usage recorded yet.");
+    body.replaceChildren(tiles, el("h2", { textContent: "Usage per day" }), daily, el("h2", { textContent: "Heaviest users" }), top,
+      el("p", { className: "hint", textContent: "Streamed = video data relayed by your server. Updates every 10 seconds." }));
+  }
+
+  async function renderUsers(body) {
+    const r = await api("/api/admin/users");
+    if (adminTab !== "users") return;
+    const rows = r.users.map((u) => {
+      const acts = el("div", { className: "row" });
+      const clr = el("button", { className: "btn small", textContent: "Clear history", type: "button" });
+      clr.onclick = async () => {
+        if (!confirm(`Delete ${u.username}'s saved searches and watch progress? The account stays.`)) return;
+        try { await api(`/api/admin/users/${u.id}/clear`, { method: "POST", body: {} }); flash("History cleared."); showTab("users"); }
+        catch (err) { flash(err.message); }
+      };
+      acts.append(clr);
+      if (!u.is_admin) {
+        const del = el("button", { className: "btn small danger", textContent: "Delete account", type: "button" });
+        del.onclick = async () => {
+          if (!confirm(`Delete the account "${u.username}" and everything stored for it? This can't be undone.`)) return;
+          try { await api(`/api/admin/users/${u.id}`, { method: "DELETE" }); flash("Account deleted."); showTab("users"); }
+          catch (err) { flash(err.message); }
+        };
+        acts.append(del);
+      }
+      const name = el("span", { textContent: u.username });
+      if (u.is_admin) name.append(" ", el("span", { className: "tag", textContent: "admin" }));
+      if (u.id === r.me) name.append(" ", el("span", { className: "tag", textContent: "you" }));
+      const joined = el("span", { title: fmtTime(u.created_at), textContent: new Date(u.created_at * 1000).toLocaleDateString() });
+      const streamed = el("span", { title: `all time: ${fmtBytes(u.bytes_total)}`, textContent: fmtBytes(u.bytes_7d) });
+      return [name, joined, ago(u.last_seen), u.requests_7d, streamed, `${u.searches_saved} / ${u.shows_tracked}`, acts];
+    });
+    rows.push(["Guests (all together)", "", "", r.guests.requests_7d, fmtBytes(r.guests.bytes_7d), "", ""]);
+    body.replaceChildren(table(["User", "Joined", "Last active", "Requests 7d", "Streamed 7d", "Saved searches / shows", ""], rows),
+      el("p", { className: "hint", textContent: "Admins are managed on the server: python app.py make-admin NAME / remove-admin NAME." }));
+  }
+
+  async function renderRequests(body) {
+    const f = { kind: "", q: "" };
+    let next = null;
+    const kind = el("select", {}, ...["", "search", "episodes", "play", "login", "login_failed", "register", "register_failed", "guest", "admin"]
+      .map((k) => el("option", { value: k, textContent: k || "All kinds" })));
+    const q = el("input", { type: "text", placeholder: "Filter by user, title or IP…" });
+    const refresh = el("button", { className: "btn", type: "button", textContent: "Refresh" });
+    const more = el("button", { className: "btn", type: "button", textContent: "Load more", hidden: true });
+    const tb = el("div");
+    async function load(append) {
+      const params = new URLSearchParams({ limit: "100" });
+      if (kind.value) params.set("kind", kind.value);
+      if (q.value.trim()) params.set("q", q.value.trim());
+      if (append && next) params.set("before", next);
+      const r = await api("/api/admin/requests?" + params);
+      const rows = r.events.map((e) => [fmtTime(e.ts), e.username, e.kind, el("span", { className: e.status >= 400 ? "st-bad" : "", textContent: String(e.status || "") }), e.detail, e.ip]);
+      const t = table(["Time", "User", "Kind", "Status", "Detail", "IP"], rows, "No matching requests.");
+      t.querySelectorAll("tbody tr td:nth-child(5)").forEach((td) => td.classList.add("wrap"));
+      if (append) { const old = tb.querySelector("tbody"); t.querySelectorAll("tbody tr").forEach((tr) => old.append(tr)); }
+      else tb.replaceChildren(t);
+      next = r.next; more.hidden = !r.next;
+    }
+    const go = () => load(false).catch((err) => flash(err.message));
+    kind.onchange = go; refresh.onclick = go; more.onclick = () => load(true).catch((err) => flash(err.message));
+    let t = 0; q.oninput = () => { clearTimeout(t); t = setTimeout(go, 350); };
+    body.replaceChildren(el("div", { className: "filters" }, kind, q, refresh), tb, more,
+      el("p", { className: "hint", textContent: "Guest requests are logged without the search text or IP address. The log keeps the latest 50,000 entries or ANIWEB_LOG_DAYS days." }));
+    await load(false);
+  }
+
+  async function renderData(body) {
+    const o = await api("/api/admin/overview");
+    if (adminTab !== "data") return;
+    const days = el("select", {}, ...[["0", "everything"], ["30", "older than 30 days"], ["7", "older than 7 days"]].map(([v, t]) => el("option", { value: v, textContent: t })));
+    async function act(target, confirmText, extra = {}) {
+      if (confirmText && !confirm(confirmText)) return;
+      try { const r = await api("/api/admin/data/clear", { method: "POST", body: { target, ...extra } }); flash(r.deleted ? `Done, ${r.deleted} entries removed.` : "Done."); showTab("data"); }
+      catch (err) { flash(err.message); }
+    }
+    const row = (title, desc, ...controls) => el("div", { className: "datarow" }, el("div", {}, el("b", { textContent: title }), el("p", { textContent: desc })), el("div", { className: "row" }, ...controls));
+    const btn = (label, fn, danger = true) => { const b = el("button", { className: "btn small" + (danger ? " danger" : ""), type: "button", textContent: label }); b.onclick = fn; return b; };
+    body.replaceChildren(
+      el("div", { className: "tiles" }, tile(fmtBytes(o.system.db_size), "database size"), tile(o.events_total, "request log entries"),
+        tile(o.saved_searches, "saved searches"), tile(o.tracked_shows, "watch-progress entries")),
+      el("div", { className: "card", style: "margin-top:14px" },
+        row("Request log", "Who searched and played what, with IP addresses (not for guests).", days,
+          btn("Delete", () => act("requests", "Delete these request log entries?", { days: Number(days.value) }))),
+        row("Usage statistics", "Daily totals and streamed data, per user.", btn("Reset", () => act("usage", "Reset all usage statistics?"))),
+        row("Search history", "Everybody's saved searches (accounts stay).", btn("Delete all", () => act("search_history", "Delete every user's saved searches?"))),
+        row("Watch progress", "Everybody's last watched episodes and positions (accounts stay).", btn("Delete all", () => act("watch_progress", "Delete every user's watch progress?"))),
+        row("Server caches", "Cached search results and stream links. Safe to clear.", btn("Clear", () => act("caches", ""), false)),
+        row("Compact database", "Frees disk space after deleting lots of data.", btn("Compact", () => act("vacuum", ""), false))),
+      el("p", { className: "hint", textContent: "To delete a single account, use the Users tab." }));
+  }
+
+  // ---------------------------------------------------------------- boot
+  (async function boot() {
+    setAuthMode(false);
+    try {
+      const st = await fetch("/api/status").then((r) => r.json());
+      if (!st.ok) {
+        const n = $("notice"); n.hidden = false;
+        n.textContent = "The server is missing: " + st.missing.join(", ") + ". Install it and restart Mado.";
+      }
+    } catch {}
+    try {
+      const me = await api("/api/me");
+      if (me.user) enter(me.user, !!me.guest, !!me.admin); else showAuth();
+    } catch { showAuth(); }
+  })();
+})();
+</script>
+</body>
+</html>
